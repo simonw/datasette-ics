@@ -25,5 +25,6 @@ The following columns are optional:
 * `event_duration` - the duration of the event (use instead of `dtend`)
 * `event_description` - a longer description of the event
 * `event_uid` - a globally unique identifier for this event
+* `event_tzid` - the timezone for the event, e.g. `America/Chicago`
 
 A query that returns these columns can then be returned as an ics feed by adding the `.ics` extension.

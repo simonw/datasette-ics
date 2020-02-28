@@ -1,5 +1,6 @@
 from datasette import hookimpl, __version__
-from ics import Calendar, Event
+from ics import Calendar
+from .utils import EventWithTimezone
 
 
 REQUIRED_COLUMNS = {"event_name", "event_dtstart"}
@@ -28,7 +29,7 @@ def render_ics(args, data, view_name):
         title += ": " + data["human_description_en"]
 
     for row in reversed(data["rows"]):
-        e = Event()
+        e = EventWithTimezone()
         e.name = row["event_name"]
         e.begin = row["event_dtstart"]
         if "event_dtend" in columns:
@@ -41,6 +42,8 @@ def render_ics(args, data, view_name):
             # TODO: Must be globally unique - include the
             # current URL to help achieve this
             e.uid = str(row["event_uid"])
+        if "event_tzid" in columns:
+            e.timezone = row["event_tzid"]
         c.events.add(e)
 
     content_type = "text/calendar; charset=utf-8"
