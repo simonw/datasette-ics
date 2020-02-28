@@ -74,7 +74,7 @@ async def test_ics_with_timezone():
     assert (
         "BEGIN:VCALENDAR\r\n"
         "BEGIN:VEVENT\r\n"
-        "DTSTART;TZID=America/Chicago:20191023T213212Z\r\n"
+        "DTSTART;TZID=America/Chicago:20191023T213212\r\n"
         "SUMMARY:hello\r\n"
         "UID:item_1\r\n"
         "END:VEVENT\r\n"
