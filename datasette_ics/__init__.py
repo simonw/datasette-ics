@@ -8,27 +8,25 @@ REQUIRED_COLUMNS = {"event_name", "event_dtstart"}
 
 @hookimpl
 def register_output_renderer():
-    return {"extension": "ics", "callback": render_ics}
+    return {"extension": "ics", "render": render_ics, "can_render": can_render_ics}
 
 
-def render_ics(args, data, view_name):
+def render_ics(request, table, rows, columns, sql, data):
     from datasette.views.base import DatasetteError
 
-    columns = set(data["columns"])
     if not REQUIRED_COLUMNS.issubset(columns):
         raise DatasetteError(
             "SQL query must return columns {}".format(", ".join(REQUIRED_COLUMNS)),
             status=400,
         )
     c = Calendar(creator="-//Datasette {}//datasette-ics//EN".format(__version__))
-    sql = data["query"]["sql"]
-    title = title = args.get("_ics_title", sql)
-    if data.get("table"):
-        title += "/" + data["table"]
+    title = request.args.get("_ics_title", sql)
+    if table:
+        title += "/" + table
     if data.get("human_description_en"):
         title += ": " + data["human_description_en"]
 
-    for row in reversed(data["rows"]):
+    for row in reversed(rows):
         e = EventWithTimezone()
         e.name = row["event_name"]
         e.begin = row["event_dtstart"]
@@ -47,7 +45,7 @@ def render_ics(args, data, view_name):
         c.events.add(e)
 
     content_type = "text/calendar; charset=utf-8"
-    if args.get("_plain"):
+    if request.args.get("_plain"):
         content_type = "text/plain; charset=utf-8"
 
     return {
@@ -55,3 +53,7 @@ def render_ics(args, data, view_name):
         "content_type": content_type,
         "status_code": 200,
     }
+
+
+def can_render_ics(columns):
+    return REQUIRED_COLUMNS.issubset(columns)

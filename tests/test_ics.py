@@ -86,3 +86,30 @@ async def test_ics_with_timezone():
         "END:VEVENT\r\n"
         "END:VCALENDAR" == actual
     )
+
+
+@pytest.mark.asyncio
+async def test_ics_link_only_shown_for_correct_queries():
+    sql = """
+    select
+        'hello' as event_name,
+        '2019-10-23T21:32:12' as event_dtstart,
+        'item_1' as event_uid,
+        'America/Chicago' as event_tzid
+    """
+    app = Datasette([], immutables=[], memory=True).app()
+    async with httpx.AsyncClient(app=app) as client:
+        response = await client.get(
+            "http://localhost/:memory:?" + urllib.parse.urlencode({"sql": sql})
+        )
+    assert 200 == response.status_code
+    assert "text/html; charset=utf-8" == response.headers["content-type"]
+    assert b'<a href="/:memory:.ics' in response.content
+    # But with a different query that link is not shown:
+    async with httpx.AsyncClient(app=app) as client:
+        response = await client.get(
+            "http://localhost/:memory:?"
+            + urllib.parse.urlencode({"sql": "select sqlite_version()"})
+        )
+    assert b'<a href="/:memory:.json' in response.content
+    assert b'<a href="/:memory:.ics' not in response.content
