@@ -1,6 +1,7 @@
 # datasette-ics
 
 [![PyPI](https://img.shields.io/pypi/v/datasette-ics.svg)](https://pypi.org/project/datasette-ics/)
+[![Changelog](https://img.shields.io/github/v/release/simonw/datasette-ics?include_prereleases&label=changelog)](https://github.com/simonw/datasette-ics/releases)
 [![CircleCI](https://circleci.com/gh/simonw/datasette-ics.svg?style=svg)](https://circleci.com/gh/simonw/datasette-ics)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/simonw/datasette-ics/blob/master/LICENSE)
 
