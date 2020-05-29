@@ -11,7 +11,9 @@ def register_output_renderer():
     return {"extension": "ics", "render": render_ics, "can_render": can_render_ics}
 
 
-def render_ics(request, table, rows, columns, sql, data):
+def render_ics(
+    datasette, request, database, table, rows, columns, sql, query_name, data
+):
     from datasette.views.base import DatasetteError
 
     if not REQUIRED_COLUMNS.issubset(columns):
@@ -25,6 +27,16 @@ def render_ics(request, table, rows, columns, sql, data):
         title = table
     if data.get("human_description_en"):
         title += ": " + data["human_description_en"]
+
+    # If this is a canned query the configured title for that over-rides all others
+    if query_name:
+        try:
+            title = datasette.metadata(database=database)["queries"][query_name][
+                "title"
+            ]
+        except (KeyError, TypeError):
+            pass
+
     if title:
         c.extra.append(parse.ContentLine(name="X-WR-CALNAME", params={}, value=title))
 

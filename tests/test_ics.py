@@ -115,3 +115,45 @@ async def test_ics_link_only_shown_for_correct_queries():
         )
     assert b'<a href="/:memory:.json' in response.content
     assert b'<a href="/:memory:.ics' not in response.content
+
+
+@pytest.mark.asyncio
+async def test_ics_from_titled_canned_query():
+    sql = """
+    select
+        'hello' as event_name,
+        '2019-10-23T21:32:12' as event_dtstart,
+        'item_1' as event_uid,
+        'America/Chicago' as event_tzid
+    """
+    app = Datasette(
+        [],
+        immutables=[],
+        memory=True,
+        metadata={
+            "databases": {
+                ":memory:": {
+                    "queries": {"calendar": {"sql": sql, "title": "My calendar"}}
+                }
+            }
+        },
+    ).app()
+    async with httpx.AsyncClient(app=app) as client:
+        response = await client.get("http://localhost/:memory:/calendar.ics")
+    assert 200 == response.status_code
+    assert "text/calendar; charset=utf-8" == response.headers["content-type"]
+    actual = response.content.decode("utf-8").strip()
+    assert (
+        "BEGIN:VCALENDAR\r\n"
+        "X-WR-CALNAME:My calendar\r\n"
+        "VERSION:2.0\r\n"
+        "PRODID:-//Datasette {}//datasette-ics//EN\r\n".format(
+            datasette.version.__version__
+        )
+        + "BEGIN:VEVENT\r\n"
+        "DTSTART;TZID=America/Chicago:20191023T213212\r\n"
+        "SUMMARY:hello\r\n"
+        "UID:item_1\r\n"
+        "END:VEVENT\r\n"
+        "END:VCALENDAR" == actual
+    )

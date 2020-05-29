@@ -28,3 +28,29 @@ The following columns are optional:
 * `event_tzid` - the timezone for the event, e.g. `America/Chicago`
 
 A query that returns these columns can then be returned as an ics feed by adding the `.ics` extension.
+
+## Using a canned query
+
+Datasette's [canned query mechanism](https://datasette.readthedocs.io/en/stable/sql_queries.html#canned-queries) can be used to configure calendars. If a canned query definition has a `title` that will be used as the title of the calendar.
+
+Here's an example, defined using a `metadata.yaml` file:
+
+```yaml
+databases:
+  mydatabase:
+    queries:
+      calendar:
+        title: My Calendar
+        sql: |-
+          select
+            title as event_name,
+            start as event_dtstart,
+            description as event_description
+          from
+            events
+          order by
+            start
+          limit
+            100
+```
+This will result in a calendar feed at `http://localhost:8001/mydatabase/calendar.ics`
