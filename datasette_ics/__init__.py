@@ -1,5 +1,5 @@
 from datasette import hookimpl, __version__
-from ics import Calendar
+from ics import Calendar, parse
 from .utils import EventWithTimezone
 
 
@@ -20,11 +20,13 @@ def render_ics(request, table, rows, columns, sql, data):
             status=400,
         )
     c = Calendar(creator="-//Datasette {}//datasette-ics//EN".format(__version__))
-    title = request.args.get("_ics_title", sql)
-    if table:
-        title += "/" + table
+    title = request.args.get("_ics_title") or ""
+    if table and not title:
+        title = table
     if data.get("human_description_en"):
         title += ": " + data["human_description_en"]
+    if title:
+        c.extra.append(parse.ContentLine(name="X-WR-CALNAME", params={}, value=title))
 
     for row in reversed(rows):
         e = EventWithTimezone()

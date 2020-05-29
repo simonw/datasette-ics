@@ -68,13 +68,15 @@ async def test_ics_with_timezone():
     app = Datasette([], immutables=[], memory=True).app()
     async with httpx.AsyncClient(app=app) as client:
         response = await client.get(
-            "http://localhost/:memory:.ics?" + urllib.parse.urlencode({"sql": sql})
+            "http://localhost/:memory:.ics?"
+            + urllib.parse.urlencode({"sql": sql, "_ics_title": "My calendar",})
         )
     assert 200 == response.status_code
     assert "text/calendar; charset=utf-8" == response.headers["content-type"]
     actual = response.content.decode("utf-8").strip()
     assert (
         "BEGIN:VCALENDAR\r\n"
+        "X-WR-CALNAME:My calendar\r\n"
         "VERSION:2.0\r\n"
         "PRODID:-//Datasette {}//datasette-ics//EN\r\n".format(
             datasette.version.__version__
