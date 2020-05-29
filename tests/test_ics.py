@@ -38,7 +38,11 @@ async def test_ics_for_valid_query():
     actual = response.content.decode("utf-8").strip()
     assert (
         "BEGIN:VCALENDAR\r\n"
-        "BEGIN:VEVENT\r\n"
+        "VERSION:2.0\r\n"
+        "PRODID:-//Datasette {}//datasette-ics//EN\r\n".format(
+            datasette.version.__version__
+        )
+        + "BEGIN:VEVENT\r\n"
         "DTSTART:20191023T213212Z\r\n"
         "SUMMARY:hello\r\n"
         "UID:item_1\r\n"
@@ -48,8 +52,6 @@ async def test_ics_for_valid_query():
         "SUMMARY:another event\r\n"
         "UID:item_2\r\n"
         "END:VEVENT\r\n"
-        "PRODID:-//Datasette 0.37//datasette-ics//EN\r\n"
-        "VERSION:2.0\r\n"
         "END:VCALENDAR" == actual
     )
 
@@ -73,12 +75,14 @@ async def test_ics_with_timezone():
     actual = response.content.decode("utf-8").strip()
     assert (
         "BEGIN:VCALENDAR\r\n"
-        "BEGIN:VEVENT\r\n"
+        "VERSION:2.0\r\n"
+        "PRODID:-//Datasette {}//datasette-ics//EN\r\n".format(
+            datasette.version.__version__
+        )
+        + "BEGIN:VEVENT\r\n"
         "DTSTART;TZID=America/Chicago:20191023T213212\r\n"
         "SUMMARY:hello\r\n"
         "UID:item_1\r\n"
         "END:VEVENT\r\n"
-        "PRODID:-//Datasette 0.37//datasette-ics//EN\r\n"
-        "VERSION:2.0\r\n"
         "END:VCALENDAR" == actual
     )
