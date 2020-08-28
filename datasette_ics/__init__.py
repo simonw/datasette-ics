@@ -1,4 +1,5 @@
 from datasette import hookimpl, __version__
+from datasette.utils.asgi import Response
 from ics import Calendar, parse
 from .utils import EventWithTimezone
 
@@ -62,11 +63,7 @@ def render_ics(
     if request.args.get("_plain"):
         content_type = "text/plain; charset=utf-8"
 
-    return {
-        "body": str(c),
-        "content_type": content_type,
-        "status_code": 200,
-    }
+    return Response(str(c), content_type=content_type, status=200)
 
 
 def can_render_ics(columns):

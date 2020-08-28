@@ -12,7 +12,11 @@ class EventWithTimezoneSerializer(EventSerializer):
             if event.timezone is None:
                 value += "Z"
             container.append(
-                ContentLine("DTSTART", value=value, params=event.timezone_params(),)
+                ContentLine(
+                    "DTSTART",
+                    value=value,
+                    params=event.timezone_params(),
+                )
             )
 
     def serialize_end(event, container):
@@ -22,7 +26,11 @@ class EventWithTimezoneSerializer(EventSerializer):
                 value += "Z"
 
             container.append(
-                ContentLine("DTEND", value=value, params=event.timezone_params(),)
+                ContentLine(
+                    "DTEND",
+                    value=value,
+                    params=event.timezone_params(),
+                )
             )
 
 

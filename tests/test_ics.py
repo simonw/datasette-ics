@@ -69,7 +69,12 @@ async def test_ics_with_timezone():
     async with httpx.AsyncClient(app=app) as client:
         response = await client.get(
             "http://localhost/:memory:.ics?"
-            + urllib.parse.urlencode({"sql": sql, "_ics_title": "My calendar",})
+            + urllib.parse.urlencode(
+                {
+                    "sql": sql,
+                    "_ics_title": "My calendar",
+                }
+            )
         )
     assert 200 == response.status_code
     assert "text/calendar; charset=utf-8" == response.headers["content-type"]
