@@ -1,7 +1,7 @@
 from setuptools import setup
 import os
 
-VERSION = "0.4"
+VERSION = "0.5"
 
 
 def get_long_description():
@@ -23,7 +23,7 @@ setup(
     version=VERSION,
     packages=["datasette_ics"],
     entry_points={"datasette": ["ics = datasette_ics"]},
-    install_requires=["datasette>=0.49a0", "ics==0.7"],
+    install_requires=["datasette>=0.49", "ics==0.7"],
     extras_require={"test": ["pytest", "pytest-asyncio", "httpx"]},
     tests_require=["datasette-ics[test]"],
 )
