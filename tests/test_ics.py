@@ -1,19 +1,14 @@
 import datasette
 from datasette.app import Datasette
-import urllib.parse
 import pytest
-import httpx
 
 
 @pytest.mark.asyncio
 async def test_incorrect_sql_returns_400():
-    app = Datasette([], immutables=[], memory=True).app()
-    async with httpx.AsyncClient(app=app) as client:
-        response = await client.get(
-            "http://localhost/:memory:.ics?sql=select+sqlite_version()"
-        )
-    assert 400 == response.status_code
-    assert b"SQL query must return columns" in response.content
+    ds = Datasette([], immutables=[], memory=True)
+    response = await ds.client.get("/_memory.ics?sql=select+sqlite_version()")
+    assert response.status_code == 400
+    assert "SQL query must return columns" in response.text
 
 
 @pytest.mark.asyncio
@@ -28,11 +23,8 @@ async def test_ics_for_valid_query():
         '2019-09-24T21:32:12' as event_dtstart,
         'item_2' as event_uid
     """
-    app = Datasette([], immutables=[], memory=True).app()
-    async with httpx.AsyncClient(app=app) as client:
-        response = await client.get(
-            "http://localhost/:memory:.ics?" + urllib.parse.urlencode({"sql": sql})
-        )
+    ds = Datasette([], immutables=[], memory=True)
+    response = await ds.client.get("_memory.ics", params={"sql": sql})
     assert 200 == response.status_code
     assert "text/calendar; charset=utf-8" == response.headers["content-type"]
     actual = response.content.decode("utf-8").strip()
@@ -65,20 +57,17 @@ async def test_ics_with_timezone():
         'item_1' as event_uid,
         'America/Chicago' as event_tzid
     """
-    app = Datasette([], immutables=[], memory=True).app()
-    async with httpx.AsyncClient(app=app) as client:
-        response = await client.get(
-            "http://localhost/:memory:.ics?"
-            + urllib.parse.urlencode(
-                {
-                    "sql": sql,
-                    "_ics_title": "My calendar",
-                }
-            )
-        )
-    assert 200 == response.status_code
-    assert "text/calendar; charset=utf-8" == response.headers["content-type"]
-    actual = response.content.decode("utf-8").strip()
+    ds = Datasette(memory=True)
+    response = await ds.client.get(
+        "/_memory.ics?",
+        params={
+            "sql": sql,
+            "_ics_title": "My calendar",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "text/calendar; charset=utf-8"
+    actual = response.text.strip()
     assert (
         "BEGIN:VCALENDAR\r\n"
         "X-WR-CALNAME:My calendar\r\n"
@@ -104,22 +93,17 @@ async def test_ics_link_only_shown_for_correct_queries():
         'item_1' as event_uid,
         'America/Chicago' as event_tzid
     """
-    app = Datasette([], immutables=[], memory=True).app()
-    async with httpx.AsyncClient(app=app) as client:
-        response = await client.get(
-            "http://localhost/:memory:?" + urllib.parse.urlencode({"sql": sql})
-        )
-    assert 200 == response.status_code
-    assert "text/html; charset=utf-8" == response.headers["content-type"]
-    assert b'<a href="/:memory:.ics' in response.content
+    ds = Datasette(memory=True)
+    response = await ds.client.get("/_memory", params={"sql": sql})
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "text/html; charset=utf-8"
+    assert '<a href="/_memory.ics' in response.text
     # But with a different query that link is not shown:
-    async with httpx.AsyncClient(app=app) as client:
-        response = await client.get(
-            "http://localhost/:memory:?"
-            + urllib.parse.urlencode({"sql": "select sqlite_version()"})
-        )
-    assert b'<a href="/:memory:.json' in response.content
-    assert b'<a href="/:memory:.ics' not in response.content
+    response2 = await ds.client.get(
+        "/_memory", params={"sql": "select sqlite_version()"}
+    )
+    assert '<a href="/_memory.json' in response2.text
+    assert '<a href="/_memory.ics' not in response2.text
 
 
 @pytest.mark.asyncio
@@ -131,23 +115,20 @@ async def test_ics_from_titled_canned_query():
         'item_1' as event_uid,
         'America/Chicago' as event_tzid
     """
-    app = Datasette(
-        [],
-        immutables=[],
+    ds = Datasette(
         memory=True,
         metadata={
             "databases": {
-                ":memory:": {
+                "_memory": {
                     "queries": {"calendar": {"sql": sql, "title": "My calendar"}}
                 }
             }
         },
-    ).app()
-    async with httpx.AsyncClient(app=app) as client:
-        response = await client.get("http://localhost/:memory:/calendar.ics")
-    assert 200 == response.status_code
-    assert "text/calendar; charset=utf-8" == response.headers["content-type"]
-    actual = response.content.decode("utf-8").strip()
+    )
+    response = await ds.client.get("/_memory/calendar.ics")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "text/calendar; charset=utf-8"
+    actual = response.text.strip()
     assert (
         "BEGIN:VCALENDAR\r\n"
         "X-WR-CALNAME:My calendar\r\n"
