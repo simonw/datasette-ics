@@ -25,5 +25,4 @@ setup(
     entry_points={"datasette": ["ics = datasette_ics"]},
     install_requires=["datasette>=0.49", "ics==0.7"],
     extras_require={"test": ["pytest", "pytest-asyncio", "httpx"]},
-    tests_require=["datasette-ics[test]"],
 )
