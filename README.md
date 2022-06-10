@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/datasette-ics.svg)](https://pypi.org/project/datasette-ics/)
 [![Changelog](https://img.shields.io/github/v/release/simonw/datasette-ics?include_prereleases&label=changelog)](https://github.com/simonw/datasette-ics/releases)
-[![CircleCI](https://circleci.com/gh/simonw/datasette-ics.svg?style=svg)](https://circleci.com/gh/simonw/datasette-ics)
+[![Tests](https://github.com/simonw/datasette-ics/workflows/Test/badge.svg)](https://github.com/simonw/datasette-ics/actions?query=workflow%3ATest)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/simonw/datasette-ics/blob/main/LICENSE)
 
 Datasette plugin that adds support for generating [iCalendar .ics files](https://tools.ietf.org/html/rfc5545) with the results of a SQL query.
