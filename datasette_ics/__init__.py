@@ -1,6 +1,7 @@
 from datasette import hookimpl, __version__
 from datasette.utils.asgi import Response
-from ics import Calendar, parse
+from ics import Calendar
+from ics.grammar.parse import ContentLine
 from .utils import EventWithTimezone
 
 
@@ -39,7 +40,7 @@ def render_ics(
             pass
 
     if title:
-        c.extra.append(parse.ContentLine(name="X-WR-CALNAME", params={}, value=title))
+        c.extra.append(ContentLine(name="X-WR-CALNAME", params={}, value=title))
 
     for row in reversed(rows):
         e = EventWithTimezone()
