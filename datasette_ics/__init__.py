@@ -1,6 +1,7 @@
 from datasette import hookimpl, __version__
 from datasette.utils.asgi import Response
-from ics import Calendar, ContentLine
+from ics import Calendar
+from ics.grammar.parse import ContentLine
 from .utils import EventWithTimezone
 
 
