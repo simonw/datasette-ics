@@ -1,7 +1,7 @@
 from setuptools import setup
 import os
 
-VERSION = "0.5.1"
+VERSION = "0.5.2"
 
 
 def get_long_description():
@@ -19,7 +19,16 @@ setup(
     long_description_content_type="text/markdown",
     author="Simon Willison",
     url="https://github.com/simonw/datasette-ics",
+    project_urls={
+        "Issues": "https://github.com/simonw/datasette-ics/issues",
+        "CI": "https://github.com/simonw/datasette-ics/actions",
+        "Changelog": "https://github.com/simonw/datasette-ics/releases",
+    },
     license="Apache License, Version 2.0",
+    classifiers=[
+        "Framework :: Datasette",
+        "License :: OSI Approved :: Apache Software License",
+    ],
     version=VERSION,
     packages=["datasette_ics"],
     entry_points={"datasette": ["ics = datasette_ics"]},
